@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { fetchAppVersion } from "../API/appAPI";
+import { StationType } from "../../constants/mrt.types";
+import { updateAppVersion, updateSearchResult } from "../API/appAPI";
 
 interface AppStateInterface {
   version: number;
+  result: Array<StationType>;
 }
 
 const appState: AppStateInterface = {
   version: 1.0,
+  result: [],
 };
 
 const appSlice = createSlice({
@@ -14,12 +17,13 @@ const appSlice = createSlice({
   initialState: appState,
   reducers: {},
   extraReducers(builder) {
-    builder.addCase(
-      fetchAppVersion.fulfilled,
-      (state: AppStateInterface, action: PayloadAction<number>) => {
+    builder
+      .addCase(updateAppVersion.fulfilled, (state: AppStateInterface, action: PayloadAction<number>) => {
         state.version = action.payload;
-      }
-    );
+      })
+      .addCase(updateSearchResult.fulfilled, (state: AppStateInterface, action: PayloadAction<Array<StationType>>) => {
+        state.result = action.payload;
+      });
   },
 });
 
