@@ -131,7 +131,7 @@ export function StationTagCheck(tag: string): StnInfoType {
 
 function setStationTag(name: string): Array<StnInfoType> {
   let result: Array<StnInfoType> = [];
-  for (var tag of name.split("/")) {
+  for (let tag of name.split("/")) {
     result.push(StationTagCheck(tag));
   }
 

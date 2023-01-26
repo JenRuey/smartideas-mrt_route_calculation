@@ -84,7 +84,7 @@ function App() {
 
     let startPoint: string = spointslct.value;
     //calc stops
-    for (var st of _.map(stops, (o) => o.name)) {
+    for (let st of _.map(stops, (o) => o.name)) {
       let stopresult = findRoute(startPoint, st);
       stopresult.pop();
       result = result.concat(stopresult);
