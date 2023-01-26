@@ -6,6 +6,8 @@ export type StationType = {
   crossRoute: Array<RouteType>;
 };
 
+export type StationResultType = { usedRoute?: string } & StationType;
+
 export type RoutesType = {
   //MRT
   EWL: Array<StationType>;

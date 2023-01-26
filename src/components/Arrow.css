@@ -4,10 +4,12 @@
 
 .arrow span {
   display: block;
-  width: 1.5vw;
-  height: 1.5vw;
-  border-bottom: 5px solid black;
-  border-right: 5px solid black;
+  width: 10px;
+  height: 10px;
+  border-bottom-width: 5px;
+  border-bottom-style: solid;
+  border-right-width: 5px;
+  border-right-style: solid;
   animation: animate 2s infinite;
 }
 

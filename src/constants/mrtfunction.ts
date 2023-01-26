@@ -1,17 +1,17 @@
 import _ from "lodash";
-import { CrossPointType, RoutesType, StationType } from "./mrt.types";
+import { CrossPointType, RoutesType, StationResultType, StationType } from "./mrt.types";
 import { allRoutes, allStation } from "./mrtmap";
 
-function formPartialPath(route: Array<StationType>, startIndex: number, endIndex: number): Array<StationType> {
-  let _route: Array<StationType> = [];
+function formPartialPath(route: Array<StationType>, routename: string, startIndex: number, endIndex: number): Array<StationType> {
+  let _route: Array<StationResultType> = [];
 
   if (startIndex <= endIndex) {
     for (let i = startIndex; i <= endIndex; i++) {
-      _route.push(route[i]);
+      _route.push({ ...route[i], usedRoute: routename });
     }
   } else {
     for (let i = startIndex; i >= endIndex; i--) {
-      _route.push(route[i]);
+      _route.push({ ...route[i], usedRoute: routename });
     }
   }
 
@@ -30,7 +30,7 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
     let sstni = _.findIndex(_routes[rt], (o) => o.name === startPoint.name);
     _.map(_routes[rt], (stn, stni) => {
       if (stn.name === endPoint.name) {
-        possibleRoute.push(formPartialPath(_routes[rt], sstni, stni));
+        possibleRoute.push(formPartialPath(_routes[rt], rt, sstni, stni));
       } else if (stn.crossRoute.length > 1 && !_exludeStation.includes(stn.name)) {
         _exludeStation.push(stn.name);
         crossPoint.push({ station: stn, route: _routes[rt], routeName: rt, startIndex: sstni, endIndex: stni });
@@ -42,7 +42,7 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
     let cp = _cp;
 
     let shortestPossible: number = (_.minBy(possibleRoute, (o) => o.length) || Array(9999)).length;
-    let defaultCrossRoute = formPartialPath(cp.route, cp.startIndex, cp.endIndex);
+    let defaultCrossRoute = formPartialPath(cp.route, cp.routeName, cp.startIndex, cp.endIndex);
 
     if (shortestPossible > defaultCrossRoute.length) {
       let crossPossibleRoute: Array<Array<StationType>> = findPath(cp.station, endPoint, _.cloneDeep(_exludeStation));

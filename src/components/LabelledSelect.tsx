@@ -14,13 +14,9 @@ const SelectWrapper = styled(Wrapper)`
   }
 `;
 
-function LabelledSelect({
-  label,
-  lblSize = 100,
-  ...htmlselectprops
-}: LabelledSelectType) {
+function LabelledSelect({ label, lblColor, lblSize = 100, ...htmlselectprops }: LabelledSelectType) {
   return (
-    <SelectWrapper lblSize={lblSize}>
+    <SelectWrapper lblSize={lblSize} lblColor={lblColor}>
       <div className="label-wrap">
         <label htmlFor={htmlselectprops.id}>{label}</label>
       </div>

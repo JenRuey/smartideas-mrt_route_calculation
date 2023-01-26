@@ -1,13 +1,16 @@
+import { RxCrossCircled } from "react-icons/rx";
 import styled from "styled-components";
 import { StationType } from "../constants/mrt.types";
 
 type StationBoxType = {
   item: StationType;
+  ltr?: boolean;
+  delaction?: () => void;
 };
 
 type StnInfoType = {
   name: string;
-  color: "green" | "red" | "purple" | "orange" | "blue" | "brown" | "gray";
+  color: "green" | "red" | "purple" | "orange" | "blue" | "saddlebrown" | "gray" | "black";
   fontColor: "white" | "black";
 };
 
@@ -52,6 +55,7 @@ type StnInfoType = {
 const StationTag = styled.div`
   display: flex;
   align-items: center;
+  margin-right: 4px;
   > div {
     padding: 4px 8px;
   }
@@ -65,9 +69,15 @@ const StationTag = styled.div`
   }
 `;
 
-function StationBox({ item }: StationBoxType) {
+const FloatIcon = styled.div`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+`;
+
+function StationBox({ item, delaction, ltr = false }: StationBoxType) {
   return (
-    <div className="p-1 border m-1" style={{ background: "white" }}>
+    <div className={"hover-ap-icon p-1 border m-1" + (ltr ? " flex-center" : "")} style={{ background: "white" }}>
       <StationTag>
         {setStationTag(item.name).map((stn, index) => {
           return (
@@ -78,28 +88,51 @@ function StationBox({ item }: StationBoxType) {
         })}
       </StationTag>
       <div>{item.description}</div>
+      {delaction && (
+        <FloatIcon className={"float-icon"}>
+          <RxCrossCircled color={"red"} size={25} onClick={delaction} />
+        </FloatIcon>
+      )}
     </div>
   );
+}
+
+export function StationTagCheck(tag: string): StnInfoType {
+  if (/^EW/.test(tag)) {
+    return { name: tag, color: "green", fontColor: "white" };
+  } else if (/^NS/.test(tag)) {
+    return { name: tag, color: "red", fontColor: "white" };
+  } else if (/^NE/.test(tag)) {
+    return { name: tag, color: "purple", fontColor: "white" };
+  } else if (/^CC/.test(tag)) {
+    return { name: tag, color: "orange", fontColor: "white" };
+  } else if (/^DT/.test(tag)) {
+    return { name: tag, color: "blue", fontColor: "white" };
+  } else if (/^TE/.test(tag)) {
+    return { name: tag, color: "saddlebrown", fontColor: "white" };
+  } else if (
+    // lrtprefix name
+    /^BP/.test(tag) ||
+    /^SE/.test(tag) ||
+    /^SW/.test(tag) ||
+    /^PE/.test(tag) ||
+    /^PW/.test(tag) ||
+    // lrtrouteprefix name
+    /^STC/.test(tag) ||
+    /^PTC/.test(tag) ||
+    /^SK/.test(tag) ||
+    /^PG/.test(tag)
+  ) {
+    return { name: tag, color: "gray", fontColor: "white" };
+  }
+
+  return { name: tag, color: "black", fontColor: "white" };
 }
 
 function setStationTag(name: string): Array<StnInfoType> {
   let result: Array<StnInfoType> = [];
   for (var tag of name.split("/")) {
-    if (/^EW/.test(tag)) {
-      result.push({ name: tag, color: "green", fontColor: "white" });
-    } else if (/^NS/.test(tag)) {
-      result.push({ name: tag, color: "red", fontColor: "white" });
-    } else if (/^NE/.test(tag)) {
-      result.push({ name: tag, color: "purple", fontColor: "white" });
-    } else if (/^CC/.test(tag)) {
-      result.push({ name: tag, color: "orange", fontColor: "white" });
-    } else if (/^DT/.test(tag)) {
-      result.push({ name: tag, color: "blue", fontColor: "white" });
-    } else if (/^TE/.test(tag)) {
-      result.push({ name: tag, color: "brown", fontColor: "white" });
-    } else if (/^BP/.test(tag) || /^SE/.test(tag) || /^SW/.test(tag) || /^PE/.test(tag) || /^PW/.test(tag)) {
-      result.push({ name: tag, color: "gray", fontColor: "white" });
-    }
+    result.push(StationTagCheck(tag));
   }
 
   return result;

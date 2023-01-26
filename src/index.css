@@ -1,8 +1,6 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -28,4 +26,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.hover-ap-icon {
+  position: relative;
+}
+.float-icon {
+  position: absolute;
+  opacity: 0;
+}
+.hover-ap-icon:hover .float-icon {
+  opacity: 1;
+  cursor: pointer;
 }
