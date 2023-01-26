@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { useRef, useState, SetStateAction } from "react";
+import { SetStateAction, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FcIdea } from "react-icons/fc";
 import { IoIosArrowForward } from "react-icons/io";
@@ -85,13 +85,12 @@ function App() {
     let startPoint: string = spointslct.value;
     //calc stops
     for (var st of _.map(stops, (o) => o.name)) {
-      let testresult = findRoute(startPoint, st);
-      testresult.pop();
-      result = result.concat(testresult);
+      let stopresult = findRoute(startPoint, st);
+      stopresult.pop();
+      result = result.concat(stopresult);
       startPoint = st;
     }
-    result = result.concat(findRoute(startPoint, epointslct.value));
-
+    result = result.concat(findRoute(startPoint, epointslct.value || startPoint));
     dispatch(updateSearchResult(result));
   };
 
