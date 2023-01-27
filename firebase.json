@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "smart-ideas-mrt-route-calc",
     "public": "build",
     "ignore": [
       "firebase.json",
