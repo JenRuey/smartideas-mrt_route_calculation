@@ -1,3 +1,7 @@
+
+
+https://smart-ideas-mrt-route-calc.firebaseapp.com/
+
 ## version 1
 
 calculation & logic first draft
