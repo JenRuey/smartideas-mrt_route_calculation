@@ -18,7 +18,7 @@ type StationResultWithStopsType = StationResultType & {
   stopIndex: number;
 };
 
-function formatStationLine(line: Array<StationResultType>, stops: Array<StationType>): Array<Array<StationResultWithStopsType>> {
+export function formatStationLine(line: Array<StationResultType>, stops: Array<StationType> | undefined = []): Array<Array<StationResultWithStopsType>> {
   let result: Array<Array<StationResultWithStopsType>> = [];
 
   //partialroute

@@ -1,12 +1,13 @@
 export type RouteType = "EWL" | "EWLChangi" | "NSL" | "NEL" | "CCL" | "CCLDhoby" | "DTL" | "TEL" | "BP-CCK" | "BP-C" | "BP-C-R" | "SK-E" | "SK-E-R" | "SK-W" | "SK-W-R" | "PG-E" | "PG-E-R" | "PG-W" | "PG-W-R";
 
+type RouteTypeWithTime = { route: RouteType; minuteFromStn1: number };
 export type StationType = {
   name: string;
   description: string;
-  crossRoute: Array<RouteType>;
+  crossRoute: Array<RouteTypeWithTime>;
 };
 
-export type StationResultType = { usedRoute?: string } & StationType;
+export type StationResultType = { usedRoute?: string; transferStn?: boolean } & StationType;
 
 export type RoutesType = {
   //MRT

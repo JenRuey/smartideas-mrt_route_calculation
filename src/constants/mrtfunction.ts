@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { formatStationLine } from "../components/StationLine";
 import { CrossPointType, RoutesType, StationResultType, StationType } from "./mrt.types";
 import { allRoutes, allStation } from "./mrtmap";
 
@@ -27,13 +28,13 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
 
   for (let _rt of startPoint.crossRoute) {
     let rt = _rt;
-    let sstni = _.findIndex(_routes[rt], (o) => o.name === startPoint.name);
-    _.map(_routes[rt], (stn, stni) => {
+    let sstni = _.findIndex(_routes[rt.route], (o) => o.name === startPoint.name);
+    _.map(_routes[rt.route], (stn, stni) => {
       if (stn.name === endPoint.name) {
-        possibleRoute.push(formPartialPath(_routes[rt], rt, sstni, stni));
+        possibleRoute.push(formPartialPath(_routes[rt.route], rt.route, sstni, stni));
       } else if (stn.crossRoute.length > 1 && !_exludeStation.includes(stn.name)) {
         _exludeStation.push(stn.name);
-        crossPoint.push({ station: stn, route: _routes[rt], routeName: rt, startIndex: sstni, endIndex: stni });
+        crossPoint.push({ station: stn, route: _routes[rt.route], routeName: rt.route, startIndex: sstni, endIndex: stni });
       }
     });
   }
@@ -47,12 +48,8 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
     if (shortestPossible > defaultCrossRoute.length) {
       let crossPossibleRoute: Array<Array<StationResultType>> = findPath(cp.station, endPoint, _.cloneDeep(_exludeStation));
       for (let cpr of crossPossibleRoute) {
-        possibleRoute.push(
-          defaultCrossRoute.concat(
-            //_.filter(cpr, (o) => o.name !== cp.station.name)
-            cpr
-          )
-        );
+        let transferstn: StationResultType = { ...cpr[0], transferStn: true };
+        possibleRoute.push(defaultCrossRoute.concat([transferstn]).concat(_.drop(cpr, 1)));
       }
     }
   }
@@ -72,9 +69,30 @@ export function findRoutes(startPoint: string, endPoint: string): Array<Array<St
   return routes;
 }
 
-export function findRoute(startPoint: string, endPoint: string): Array<StationResultType> {
+export function findRoute(startPoint: string, endPoint: string, shortestTransfer: boolean): Array<StationResultType> {
   let routes: Array<Array<StationResultType>> = findRoutes(startPoint, endPoint);
-  let shortestRoute: Array<StationResultType> = _.minBy(routes, (o) => o.length) || [];
 
-  return shortestRoute; //_.map(shortestRoute, (o) => o.name);
+  if (!shortestTransfer) {
+    //shortestRoute
+    let shortestRoute: Array<StationResultType> = _.minBy(routes, (o) => _.filter(o, (o1) => !o1.transferStn).length) || [];
+    return shortestRoute;
+  } else {
+    //shortestTransfer
+    let minTransfer: number = 999;
+    let trfcategory: Array<Array<Array<StationResultType>>> = Array(999).fill([]);
+    for (let route of routes) {
+      let trf = formatStationLine(route).length;
+      if (minTransfer > trf) minTransfer = trf;
+      trfcategory[trf] = [...trfcategory[trf], route];
+    }
+    let shortestTransfer: Array<StationResultType> = _.minBy(trfcategory[minTransfer], (o) => _.filter(o, (o1) => !o1.transferStn).length) || [];
+    return shortestTransfer;
+  }
+
+  //availableTransfer
+  // let availableTransfer: Array<Array<StationResultType>> = [];
+  // for (let tc of _.filter(trfcategory, (o) => o.length > 0)) {
+  //   let shortTransfer: Array<StationResultType> = _.minBy(tc, (o) => _.filter(o, (o1) => !o1.transferStn).length) || [];
+  //   availableTransfer.push(shortTransfer);
+  // }
 }

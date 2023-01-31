@@ -19,6 +19,7 @@ import { ordinal_suffix_of } from "./utils/number-utils";
 interface RouteFormElements extends HTMLFormControlsCollection {
   spointslct: HTMLSelectElement;
   epointslct: HTMLSelectElement;
+  shortestTransfer: HTMLInputElement;
 }
 
 interface RouteForm extends HTMLFormElement {
@@ -153,7 +154,7 @@ function App() {
   const calcRoute = (event: React.FormEvent<RouteForm>) => {
     event.preventDefault();
 
-    let { spointslct, epointslct } = event.currentTarget.elements;
+    let { spointslct, epointslct, shortestTransfer } = event.currentTarget.elements;
     setLoading(true);
     document.body.style.overflow = "hidden";
     setTimeout(() => {
@@ -162,7 +163,7 @@ function App() {
       let startPoint: string = spointslct.value;
       //calc stops
       for (let st of _.map(stops, (o) => o.name)) {
-        stopresult = findRoute(startPoint, st);
+        stopresult = findRoute(startPoint, st, shortestTransfer.checked);
         if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
         // stopresult.pop();
         result = result.concat(stopresult);
@@ -170,7 +171,7 @@ function App() {
         startPoint = st;
       }
 
-      stopresult = findRoute(startPoint, epointslct.value || startPoint);
+      stopresult = findRoute(startPoint, epointslct.value || startPoint, shortestTransfer.checked);
       if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
       // stopresult.pop();
       result = result.concat(stopresult);
@@ -250,6 +251,12 @@ function App() {
             />
 
             <div className="d-flex justify-content-end">
+              <div className="flex-center me-3">
+                <label htmlFor="shortestTransfer" className="me-2 mb-0">
+                  <small>{"Shortest Transfer"}</small>
+                </label>
+                <input id={"shortestTransfer"} name={"shortestTransfer"} type="checkbox" />
+              </div>
               <Button variant="success" type="submit">
                 {"Calculate"}
               </Button>
