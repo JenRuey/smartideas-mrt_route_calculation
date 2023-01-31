@@ -63,7 +63,7 @@ function StationLine({ line, stops }: StationLineType) {
 
   let totalStn = _.sumBy(formatted, (o) => o.length);
   return (
-    <div className={"result-box d-flex flex-column mt-3"}>
+    <div id={"result-box"} className={"d-flex flex-column mt-3"}>
       {formatted.length > 0 && (
         <div className="w-100 flex-center my-3">
           {formatted.map((format, findex) => {

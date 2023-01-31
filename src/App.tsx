@@ -5,6 +5,7 @@ import { FcIdea } from "react-icons/fc";
 import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosArrowForward } from "react-icons/io";
 import LabelledAutocompleteText from "./components/LabelledAutocompleteText";
+import Loading from "./components/Loading";
 import StationBox from "./components/StationBox";
 import StationLine from "./components/StationLine";
 import { ShadowBox } from "./components/styled/ShadowBox";
@@ -147,33 +148,41 @@ function App() {
   const dispatch = useAppDispatch();
 
   const [stops, addStop] = useState<Array<StationType>>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const calcRoute = (event: React.FormEvent<RouteForm>) => {
     event.preventDefault();
-    let { spointslct, epointslct } = event.currentTarget.elements;
 
-    let result: Array<StationResultType> = [];
-    let stopresult: Array<StationResultType> = [];
-    let startPoint: string = spointslct.value;
-    //calc stops
-    for (let st of _.map(stops, (o) => o.name)) {
-      stopresult = findRoute(startPoint, st);
+    let { spointslct, epointslct } = event.currentTarget.elements;
+    setLoading(true);
+    document.body.style.overflow = "hidden";
+    setTimeout(() => {
+      let result: Array<StationResultType> = [];
+      let stopresult: Array<StationResultType> = [];
+      let startPoint: string = spointslct.value;
+      //calc stops
+      for (let st of _.map(stops, (o) => o.name)) {
+        stopresult = findRoute(startPoint, st);
+        if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
+        // stopresult.pop();
+        result = result.concat(stopresult);
+
+        startPoint = st;
+      }
+
+      stopresult = findRoute(startPoint, epointslct.value || startPoint);
       if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
       // stopresult.pop();
       result = result.concat(stopresult);
 
-      startPoint = st;
-    }
-
-    stopresult = findRoute(startPoint, epointslct.value || startPoint);
-    if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
-    // stopresult.pop();
-    result = result.concat(stopresult);
-
-    dispatch(updateSearchResult(result));
+      dispatch(updateSearchResult(result));
+      setTimeout(() => {
+        document.getElementById("result-box")?.scrollIntoView();
+        setLoading(false);
+        document.body.style.overflow = "auto";
+      }, 800);
+    }, 200);
   };
-
-  const stations = _.sortBy(allStation, (o) => o.description);
 
   const onStopSelectChanged = (value: string) => {
     let stopStation = _.find(allStation, (o) => o.name === value);
@@ -188,8 +197,10 @@ function App() {
     }
   };
 
+  const stations = _.sortBy(allStation, (o) => o.description);
   return (
     <div className="App">
+      {loading && <Loading />}
       <div className="flex-center-between flex-wrap p-2" style={{ background: "darkblue", color: "white" }}>
         <div className="flex-center">
           <FcIdea size={25} />
