@@ -47,7 +47,12 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
     if (shortestPossible > defaultCrossRoute.length) {
       let crossPossibleRoute: Array<Array<StationType>> = findPath(cp.station, endPoint, _.cloneDeep(_exludeStation));
       for (let cpr of crossPossibleRoute) {
-        possibleRoute.push(defaultCrossRoute.concat(_.filter(cpr, (o) => o.name !== cp.station.name)));
+        possibleRoute.push(
+          defaultCrossRoute.concat(
+            //_.filter(cpr, (o) => o.name !== cp.station.name)
+            cpr
+          )
+        );
       }
     }
   }
@@ -69,6 +74,7 @@ export function findRoutes(startPoint: string, endPoint: string): Array<Array<St
 
 export function findRoute(startPoint: string, endPoint: string): Array<StationType> {
   let routes: Array<Array<StationType>> = findRoutes(startPoint, endPoint);
+  console.log(routes);
   let shortestRoute: Array<StationType> = _.minBy(routes, (o) => o.length) || [];
 
   return shortestRoute; //_.map(shortestRoute, (o) => o.name);

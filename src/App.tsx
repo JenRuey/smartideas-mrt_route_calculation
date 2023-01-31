@@ -2,16 +2,18 @@ import _ from "lodash";
 import { SetStateAction, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FcIdea } from "react-icons/fc";
+import { GoPrimitiveDot } from "react-icons/go";
 import { IoIosArrowForward } from "react-icons/io";
-import Arrow from "./components/Arrow";
-import LabelledSelect from "./components/LabelledSelect";
+import LabelledAutocompleteText from "./components/LabelledAutocompleteText";
 import StationBox from "./components/StationBox";
+import StationLine from "./components/StationLine";
 import { ShadowBox } from "./components/styled/ShadowBox";
 import { StationType } from "./constants/mrt.types";
 import { findRoute } from "./constants/mrtfunction";
 import { allStation } from "./constants/mrtmap";
 import { updateSearchResult } from "./state/API/appAPI";
 import { useAppDispatch, useAppSelector } from "./state/hook";
+import { ordinal_suffix_of } from "./utils/number-utils";
 
 interface RouteFormElements extends HTMLFormControlsCollection {
   spointslct: HTMLSelectElement;
@@ -27,7 +29,7 @@ type StopBoxType = {
   deleteStops: (index: number) => void;
   modify: React.Dispatch<SetStateAction<Array<StationType>>>;
 };
-function StopBox({ stops, deleteStops, modify }: StopBoxType) {
+export function StopBox({ stops, deleteStops, modify }: StopBoxType) {
   const dragItem = useRef<number | undefined>();
   const dragOverItem = useRef<number | undefined>();
 
@@ -43,7 +45,6 @@ function StopBox({ stops, deleteStops, modify }: StopBoxType) {
     event.preventDefault();
 
     if (dragItem.current !== undefined && dragOverItem.current !== undefined) {
-      //console.log("moving pos " + dragItem.current + " to pos " + dragOverItem.current);
       let copyListItems = [...stops];
       let dragItemContent = copyListItems[dragItem.current];
       copyListItems.splice(dragItem.current, 1);
@@ -70,6 +71,77 @@ function StopBox({ stops, deleteStops, modify }: StopBoxType) {
   );
 }
 
+type StopLineType = {
+  stops: Array<StationType>;
+  onChange: (stops: Array<StationType>) => void;
+};
+function StopLine({ stops, onChange }: StopLineType) {
+  const moveUp = (index: number) => {
+    let array = [...stops];
+    let moveobj = array[index];
+    array.splice(index, 1);
+    array.splice(index - 1, 0, moveobj);
+    onChange(array);
+  };
+  const moveDown = (index: number) => {
+    let array = [...stops];
+    let moveobj = array[index];
+    array.splice(index, 1);
+    array.splice(index + 1, 0, moveobj);
+    onChange(array);
+  };
+  const deletethis = (index: number) => {
+    let array = [...stops];
+    array.splice(index, 1);
+    onChange(array);
+  };
+
+  return (
+    <div className={"d-flex flex-column"}>
+      {stops.map((item, index) => {
+        return (
+          <div key={"stop-box-" + index + "-" + item.name} className={"d-flex align-items-start flex-column"}>
+            <div className="d-flex flex-column mx-3">
+              <GoPrimitiveDot color="lightgreen" />
+              <GoPrimitiveDot color="lightgreen" />
+            </div>
+
+            <div className="d-flex flex-column flex-wrap">
+              <div>
+                {"Your "}
+                <strong>{ordinal_suffix_of(index + 1)}</strong>
+                {" Stop of the journey is "}
+              </div>
+              <div className="flex-center flex-wrap">
+                <StationBox item={item} ltr={true} />
+                <div className="flex-center">
+                  <div>{", move it "}</div>
+                  <button className="mx-1" type={"button"} onClick={() => moveUp(index)}>
+                    {"up"}
+                  </button>
+                  <div>{" or "}</div>
+                  <button className="mx-1" type={"button"} onClick={() => moveDown(index)}>
+                    {"down"}
+                  </button>
+                  <div>{" else "}</div>
+                  <button className="mx-1" type={"button"} onClick={() => deletethis(index)}>
+                    {"delete"}
+                  </button>
+                  <div>{" it."}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+      <div className="d-flex flex-column mx-3">
+        <GoPrimitiveDot color="lightgreen" />
+        <GoPrimitiveDot color="lightgreen" />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const appState = useAppSelector((state) => state.app);
   const dispatch = useAppDispatch();
@@ -86,7 +158,7 @@ function App() {
     //calc stops
     for (let st of _.map(stops, (o) => o.name)) {
       let stopresult = findRoute(startPoint, st);
-      stopresult.pop();
+      //stopresult.pop();
       result = result.concat(stopresult);
       startPoint = st;
     }
@@ -96,8 +168,8 @@ function App() {
 
   const stations = _.sortBy(allStation, (o) => o.description);
 
-  const onStopSelectChanged = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    let stopStation = _.find(allStation, (o) => o.name === event.target.value);
+  const onStopSelectChanged = (value: string) => {
+    let stopStation = _.find(allStation, (o) => o.name === value);
     if (stopStation !== undefined) {
       addStop((prevState) => {
         if (stopStation !== undefined) {
@@ -105,20 +177,13 @@ function App() {
         }
         return prevState;
       });
+      return true;
     }
   };
 
-  const deleteStops = (delindex: number) => {
-    addStop((prevState) => {
-      let newArray = [...prevState];
-      newArray.splice(delindex, 1);
-      return newArray;
-    });
-  };
-
   return (
-    <div className="App m-2">
-      <div className="flex-center-between flex-wrap mb-2">
+    <div className="App">
+      <div className="flex-center-between flex-wrap p-2" style={{ background: "darkblue", color: "white" }}>
         <div className="flex-center">
           <FcIdea size={25} />
           <span className="header">SMART IDEAS</span>
@@ -126,67 +191,54 @@ function App() {
         <div>{"MRT Route Calculation " + appState.version.toFixed(1)}</div>
       </div>
 
-      <Form onSubmit={calcRoute}>
-        <ShadowBox>
-          <LabelledSelect name={"spointslct"} label={"Start From"} defaultValue={""} data-testid={"spointslct"}>
-            <option value="" disabled>
-              {"Your Origin..."}
-            </option>
-            {stations.map((item) => {
-              return (
-                <option key={"opt-origin-" + item.name} value={item.name}>
-                  {item.description + " (" + item.name + ")"}
-                </option>
-              );
-            })}
-          </LabelledSelect>
-          <StopBox stops={stops} modify={addStop} deleteStops={deleteStops} />
-          <LabelledSelect name={"epointslct"} label={"End At"} defaultValue={""} data-testid={"epointslct"}>
-            <option value="" disabled>
-              {"Your Destination..."}
-            </option>
-            {stations.map((item) => {
-              return (
-                <option key={"opt-dest-" + item.name} value={item.name}>
-                  {item.description + " (" + item.name + ")"}
-                </option>
-              );
-            })}
-          </LabelledSelect>
-
-          <div id="add-stop-box">
-            <LabelledSelect lblColor={"lightgreen"} name={"stopboxselector"} label={"Add Stop"} defaultValue={""} data-testid={"stopboxselector"} onChange={onStopSelectChanged}>
-              <option value="" disabled>
-                {"Your stop..."}
-              </option>
-              {stations.map((item) => {
-                return (
-                  <option key={"opt-stop-" + item.name} value={item.name}>
-                    {item.description + " (" + item.name + ")"}
-                  </option>
-                );
+      <div className="p-2">
+        <Form onSubmit={calcRoute}>
+          <ShadowBox>
+            <LabelledAutocompleteText
+              name={"spointslct"}
+              label={"Start From"}
+              data-testid={"spointslct"}
+              placeholder={"Your Origin..."}
+              options={stations.map((item) => {
+                return { label: item.description + " (" + item.name + ")", value: item.name };
               })}
-            </LabelledSelect>
-          </div>
-
-          <div className="d-flex justify-content-end">
-            <Button variant="success" type="submit">
-              {"Calculate"}
-            </Button>
-          </div>
-        </ShadowBox>
-      </Form>
-      <div id={"result-box"}>
-        <div className="flex-center flex-wrap overflow-hidden">
-          {appState.result.map((item, index) => {
-            return (
-              <div key={"result-station-" + index} className={"flex-center"}>
-                <StationBox item={item} />
-                {index !== appState.result.length - 1 && <Arrow direction="right" route={appState.result[index + 1].usedRoute || ""} />}
+            />
+            <StopLine stops={stops} onChange={addStop} />
+            <div id="add-stop-box">
+              <LabelledAutocompleteText
+                lblColor={"lightgreen"}
+                name={"stopboxselector"}
+                label={"Add Stop"}
+                data-testid={"stopboxselector"}
+                onChange={onStopSelectChanged}
+                placeholder={"Your stop..."}
+                options={stations.map((item) => {
+                  return { label: item.description + " (" + item.name + ")", value: item.name };
+                })}
+              />
+              <div className="d-flex flex-column mx-3">
+                <GoPrimitiveDot color="#d0ff00" />
+                <GoPrimitiveDot color="#d0ff00" />
               </div>
-            );
-          })}
-        </div>
+            </div>
+            <LabelledAutocompleteText
+              name={"epointslct"}
+              label={"End At"}
+              data-testid={"epointslct"}
+              placeholder={"Your Destination..."}
+              options={stations.map((item) => {
+                return { label: item.description + " (" + item.name + ")", value: item.name };
+              })}
+            />
+
+            <div className="d-flex justify-content-end">
+              <Button variant="success" type="submit">
+                {"Calculate"}
+              </Button>
+            </div>
+          </ShadowBox>
+        </Form>
+        <StationLine line={appState.result} stops={stops} />
       </div>
     </div>
   );

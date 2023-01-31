@@ -1,9 +1,10 @@
+import _ from "lodash";
 import { RxCrossCircled } from "react-icons/rx";
 import styled from "styled-components";
-import { StationType } from "../constants/mrt.types";
+import { StationResultType } from "../constants/mrt.types";
 
 type StationBoxType = {
-  item: StationType;
+  item: StationResultType;
   ltr?: boolean;
   delaction?: () => void;
 };
@@ -76,17 +77,31 @@ const FloatIcon = styled.div`
 `;
 
 function StationBox({ item, delaction, ltr = false }: StationBoxType) {
+  let stationTags = setStationTag(item.name);
+  let prior = StationTagCheck(item?.usedRoute || "");
   return (
     <div className={"hover-ap-icon p-1 border m-1" + (ltr ? " flex-center" : "")} style={{ background: "white" }}>
-      <StationTag>
-        {setStationTag(item.name).map((stn, index) => {
-          return (
-            <div key={"cr-" + index} style={{ background: stn.color, color: stn.fontColor }}>
-              {stn.name}
-            </div>
-          );
-        })}
-      </StationTag>
+      {prior && _.some(stationTags, (o) => o.color === prior.color) ? (
+        <StationTag>
+          {_.filter(stationTags, (o) => o.color === prior.color).map((stn, index) => {
+            return (
+              <div key={"cr-" + index} style={{ background: stn.color, color: stn.fontColor }}>
+                {stn.name}
+              </div>
+            );
+          })}
+        </StationTag>
+      ) : (
+        <StationTag>
+          {stationTags.map((stn, index) => {
+            return (
+              <div key={"cr-" + index} style={{ background: stn.color, color: stn.fontColor }}>
+                {stn.name}
+              </div>
+            );
+          })}
+        </StationTag>
+      )}
       <div>{item.description}</div>
       {delaction && (
         <FloatIcon className={"float-icon"}>

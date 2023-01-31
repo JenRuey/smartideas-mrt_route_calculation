@@ -12,6 +12,7 @@ export const Wrapper = styled.div<Pick<LabelledType, "lblSize" | "lblColor">>`
   display: flex;
   align-items: stretch;
   margin-bottom: 8px;
+  position: relative;
   div[class*="-wrap"] {
     display: flex;
     align-items: center;
@@ -20,5 +21,14 @@ export const Wrapper = styled.div<Pick<LabelledType, "lblSize" | "lblColor">>`
   .label-wrap {
     background: ${(props) => props.lblColor || "#d0ff00"};
     width: ${(props) => (props.lblSize ? props.lblSize + "px" : "undefined")};
+  }
+`;
+
+export const HoverColor = styled.div`
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  :hover {
+    background: lightgray;
   }
 `;
