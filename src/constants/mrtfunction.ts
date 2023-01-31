@@ -2,7 +2,7 @@ import _ from "lodash";
 import { CrossPointType, RoutesType, StationResultType, StationType } from "./mrt.types";
 import { allRoutes, allStation } from "./mrtmap";
 
-function formPartialPath(route: Array<StationType>, routename: string, startIndex: number, endIndex: number): Array<StationType> {
+function formPartialPath(route: Array<StationType>, routename: string, startIndex: number, endIndex: number): Array<StationResultType> {
   let _route: Array<StationResultType> = [];
 
   if (startIndex <= endIndex) {
@@ -18,8 +18,8 @@ function formPartialPath(route: Array<StationType>, routename: string, startInde
   return _route;
 }
 
-function findPath(startPoint: StationType, endPoint: StationType, excludeStation?: Array<string>): Array<Array<StationType>> {
-  let possibleRoute: Array<Array<StationType>> = [];
+function findPath(startPoint: StationType, endPoint: StationType, excludeStation?: Array<string>): Array<Array<StationResultType>> {
+  let possibleRoute: Array<Array<StationResultType>> = [];
   let _exludeStation: Array<string> = excludeStation || [];
 
   let _routes: RoutesType = allRoutes;
@@ -45,7 +45,7 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
     let defaultCrossRoute = formPartialPath(cp.route, cp.routeName, cp.startIndex, cp.endIndex);
 
     if (shortestPossible > defaultCrossRoute.length) {
-      let crossPossibleRoute: Array<Array<StationType>> = findPath(cp.station, endPoint, _.cloneDeep(_exludeStation));
+      let crossPossibleRoute: Array<Array<StationResultType>> = findPath(cp.station, endPoint, _.cloneDeep(_exludeStation));
       for (let cpr of crossPossibleRoute) {
         possibleRoute.push(
           defaultCrossRoute.concat(
@@ -60,11 +60,11 @@ function findPath(startPoint: StationType, endPoint: StationType, excludeStation
   return possibleRoute;
 }
 
-export function findRoutes(startPoint: string, endPoint: string): Array<Array<StationType>> {
+export function findRoutes(startPoint: string, endPoint: string): Array<Array<StationResultType>> {
   let stnStart = _.find(allStation, (o) => o.name === startPoint);
   let stnEnd = _.find(allStation, (o) => o.name === endPoint);
 
-  let routes: Array<Array<StationType>> = [];
+  let routes: Array<Array<StationResultType>> = [];
   if (stnStart !== undefined && stnEnd !== undefined) {
     routes = findPath(stnStart, stnEnd);
   }
@@ -72,10 +72,9 @@ export function findRoutes(startPoint: string, endPoint: string): Array<Array<St
   return routes;
 }
 
-export function findRoute(startPoint: string, endPoint: string): Array<StationType> {
-  let routes: Array<Array<StationType>> = findRoutes(startPoint, endPoint);
-  console.log(routes);
-  let shortestRoute: Array<StationType> = _.minBy(routes, (o) => o.length) || [];
+export function findRoute(startPoint: string, endPoint: string): Array<StationResultType> {
+  let routes: Array<Array<StationResultType>> = findRoutes(startPoint, endPoint);
+  let shortestRoute: Array<StationResultType> = _.minBy(routes, (o) => o.length) || [];
 
   return shortestRoute; //_.map(shortestRoute, (o) => o.name);
 }

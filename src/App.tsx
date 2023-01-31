@@ -8,7 +8,7 @@ import LabelledAutocompleteText from "./components/LabelledAutocompleteText";
 import StationBox from "./components/StationBox";
 import StationLine from "./components/StationLine";
 import { ShadowBox } from "./components/styled/ShadowBox";
-import { StationType } from "./constants/mrt.types";
+import { StationResultType, StationType } from "./constants/mrt.types";
 import { findRoute } from "./constants/mrtfunction";
 import { allStation } from "./constants/mrtmap";
 import { updateSearchResult } from "./state/API/appAPI";
@@ -152,17 +152,24 @@ function App() {
     event.preventDefault();
     let { spointslct, epointslct } = event.currentTarget.elements;
 
-    let result: Array<StationType> = [];
-
+    let result: Array<StationResultType> = [];
+    let stopresult: Array<StationResultType> = [];
     let startPoint: string = spointslct.value;
     //calc stops
     for (let st of _.map(stops, (o) => o.name)) {
-      let stopresult = findRoute(startPoint, st);
-      //stopresult.pop();
+      stopresult = findRoute(startPoint, st);
+      if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
+      // stopresult.pop();
       result = result.concat(stopresult);
+
       startPoint = st;
     }
-    result = result.concat(findRoute(startPoint, epointslct.value || startPoint));
+
+    stopresult = findRoute(startPoint, epointslct.value || startPoint);
+    if (result[result.length - 1]?.usedRoute === stopresult[0]?.usedRoute) stopresult.shift();
+    // stopresult.pop();
+    result = result.concat(stopresult);
+
     dispatch(updateSearchResult(result));
   };
 
