@@ -119,7 +119,7 @@ export function StationTagCheck(tag: string): StnInfoType {
     return { name: tag, color: "red", fontColor: "white" };
   } else if (/^NE/.test(tag)) {
     return { name: tag, color: "purple", fontColor: "white" };
-  } else if (/^CC/.test(tag)) {
+  } else if (/^CC/.test(tag) || /^CE/.test(tag)) {
     return { name: tag, color: "orange", fontColor: "white" };
   } else if (/^DT/.test(tag)) {
     return { name: tag, color: "blue", fontColor: "white" };
